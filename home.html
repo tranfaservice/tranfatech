@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tiêu đề trang</title>
+    <!-- Thêm CSS nội bộ nếu cần -->
+    <style>
+        body {
+            font-family: 'Times New Roman', Times, serif;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <h1>TRANFA MACHINE MONITORING</h1>
+        <p>Tìm kiếm khách hàng/Máy</p>
+        <input type="text" id="inputCustomerFinding" placeholder="Nhập tên khách hàng..." />
+        <button id="btnCustomerFinding">Tìm kiếm</button>
+        <div><button id="gbeButton" style="display: none;">GBE</button></div>
+        <div id="searchResult">
+            <p id="gbe"></p>
+        </div>
+        <script>
+            var inputCustomerFinding = "";
+            var CustomerData;
+            document.getElementById("btnCustomerFinding").addEventListener("click",function(){
+                inputCustomerFinding = document.getElementById("inputCustomerFinding").value.trim().toLowerCase();
+                if (inputCustomerFinding === "") {
+                    alert("Chuỗi rỗng hoặc chỉ chứa dấu cách");
+                }
+
+                if (CustomerData[134][1].include(inputCustomerFinding)) {
+                    document.getElementById("gbeButton").style.display = "inline-block";
+                }
+
+            });
+        </script>
+        <input type="file" id="csvFile" accept=".csv" />
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script> //Loading danh sách khách hàng
+        
+        Papa.parse("https://tranfatech.netlify.app/Customer%20data/CustomerList.csv", {
+            download: true,
+            header: false,     // Nếu CSV có header
+            complete: function(results) {
+            console.log(results.data);
+            CustomerData = results.data;
+            }
+        });
+    </script>
+
+    <script>
+        var gbe;
+        Papa.parse("https://tranfatech.netlify.app/Customer%20data/134.csv", {
+            download: true,
+            header: false,     // Nếu CSV có header
+            complete: function(results) {
+            console.log(results.data);
+            gbe = results.data;
+            }
+        });
+
+        document.getElementById("gbeButton").addEventListener("click", function () {document.getElementById("gbe").innerHTML = gbe[5][2];
+        });
+        
+    </script>
+    <script>
+        var rows = [];
+        var row_splice = [];
+        var row_convert = [];
+        document.getElementById("csvFile").addEventListener("change", function (e) {
+            const file = e.target.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function (event) {
+                const text = event.target.result;
+                rows = text.split("\r\n").map(row => row.split(","));
+                row_splice = rows.splice(5,rows.length-5);
+                console.log(rows);
+                
+                row_convert = Array.from({ length: rows[0].length }, () => Array.from({ length: rows.length }, () => 1));
+
+                for (let i = 0; i < rows.length; i++) {
+                    for(let j = 0; j < rows[i].length; j++){
+                        row_convert[j][i] = rows[i][j];
+                    };
+                };
+            };
+            reader.readAsText(file);
+        });   
+    </script>
+    
+    <!--
+    
+    
+    <div id="select_form" style="padding: 5px;">
+        <button id="bb_baotri" name="bb_baotri">Bảo trì</button>
+        <button id="bb_xlsc" name="bb_xlsc">Xử lý sự cố</button>
+        <button id="bb_giaonhan" name="bb_giaonhan">Giao nhận</button>
+        <button id="bb_bgnt" name="bb_bgnt">Bàn giao nghiêm thu</button>
+
+    </div>
+
+    <div id="document_form" style="border: 2px solid black;">
+        
+        <div id="form_baotri" style="display: none;">
+            <div>
+                <label for="customer">Tên khách hàng:</label>
+                <select id="customer" name="customer">
+                <option value="" disabled selected>-- Tên --</option>
+                <option value="c001">GBE</option>
+                <option value="c002">YELLOW BEAUTY</option>
+                <option value="c003">DR SKIN MEDISPA</option>
+                <option value="c004">BV ĐHYD</option>
+                </select>
+            </div>
+            <div>
+                <span id=""></span>
+            </div>
+        </div>
+        <div id="form_xlsc" style="display: none;">
+            DEF
+        </div>
+        <div id="form_giaonhan" style="display: none;">
+            GHI
+        </div>
+        <div id="form_bgnt" style="display: none;">
+            JKL
+        </div>
+    
+        <label for="customer">Chọn khách hàng:</label>
+        <input type="text" id="customerInput" onkeyup="filterFunction()" placeholder="Tìm khách hàng...">
+        <div id="customer_dropdown" style="border: 1px solid #ccc; display:none; max-height:150px; overflow:auto; position:absolute; background:white;">
+            <div onclick="selectItem(this)">GBE</div>
+            <div onclick="selectItem(this)">DR SKIN MEDISPA</div>
+            <div onclick="selectItem(this)">YELLOW BEAUTY</div>
+            <div onclick="selectItem(this)">BV ĐHYD</div>
+        </div>
+    </div>
+    
+    
+
+Danh sách khách hàng dropdown <script>
+        const input = document.getElementById("customerInput");
+        const dropdown = document.getElementById("customer_dropdown");
+        function filterFunction() {
+        const filter = input.value.toLowerCase();
+        dropdown.style.display = "block";
+        const items = dropdown.getElementsByTagName("div");
+        for (let i = 0; i < items.length; i++) {
+            const txt = items[i].textContent || items[i].innerText;
+            items[i].style.display = txt.toLowerCase().includes(filter) ? "" : "none";
+        }
+        }
+
+        function selectItem(elem) {
+        input.value = elem.textContent;
+        dropdown.style.display = "none";
+        }
+    </script>
+
+Chọn form văn bản <script>
+        document.getElementById("bb_baotri").addEventListener("click", function(){
+            document.getElementById("form_baotri").style.display = "block";
+
+            document.getElementById("form_xlsc").style.display = "none";document.getElementById("form_giaonhan").style.display = "none";document.getElementById("form_bgnt").style.display = "none";
+        });
+
+        document.getElementById("bb_xlsc").addEventListener("click", function(){
+            document.getElementById("form_xlsc").style.display = "block";
+
+            document.getElementById("form_baotri").style.display = "none";document.getElementById("form_giaonhan").style.display = "none";document.getElementById("form_bgnt").style.display = "none";
+        });
+
+        document.getElementById("bb_giaonhan").addEventListener("click", function(){
+            document.getElementById("form_giaonhan").style.display = "block";
+
+            document.getElementById("form_baotri").style.display = "none";document.getElementById("form_xlsc").style.display = "none";document.getElementById("form_bgnt").style.display = "none";
+        });
+
+        document.getElementById("bb_bgnt").addEventListener("click", function(){
+            document.getElementById("form_bgnt").style.display = "block";
+
+            document.getElementById("form_baotri").style.display = "none";document.getElementById("form_giaonhan").style.display = "none";document.getElementById("form_xlsc").style.display = "none";
+        });
+    </script>
+
+    <script type="application/json" id="customer_data">
+       [
+            {
+            "Name": "Tranfa",
+            "Machine": ["Q-Plus A","Chrome","Blessing"],
+            "Serial": ["QAE1706-1020","CRH2534-0723","BLS"]
+            },
+            {
+            "Name": "GBE",
+            "Machine": ["HIFU Finesse","Mesojet","Discovery Pico","Koolio","Thunder MT","DUOGlide","Mesojet","Onda Pro"],
+            "Serial": ["107222007","10319","DPE2313-1118","KOO-230078","THU4248-1223","M127A1-US241606","10057","M116N1-TU242904","KOO-230079","2420009254","DNL2951-0824","2420009254"]
+            }
+        ]
+    </script>
+    <script>
+        const customer_data = JSON.parse(document.getElementById("customer_data").textContent);
+        
+    </script>
+
+    <script type="module">
+        import data from './Data khach hang Tranfa.json';
+        console.log(data);
+    </script>
+
+
+-->
+</body>
+</html>
